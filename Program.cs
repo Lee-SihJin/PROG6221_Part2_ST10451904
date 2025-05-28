@@ -10,19 +10,26 @@ namespace Chatbot
         static string userName = "";
         static string userInterest = "";
 
-        static Dictionary<string, List<string>> keywordResponses = new Dictionary<string, List<string>>()
+        static Dictionary<string, List<string>> keywordResponses = new Dictionary<string, List<string>>
         {
-            { "password", new List<string> { "Use strong, unique passwords for each account.", "Avoid personal details in your passwords.", "Enable two-factor authentication for extra security." } },
-            { "scam", new List<string> { "Be cautious of unsolicited emails requesting personal info.", "Verify the source before clicking on suspicious links." } },
-            { "privacy", new List<string> { "Review your privacy settings on all social media accounts.", "Limit personal information shared online." } },
-            { "phishing", new List<string> { "Watch out for urgent requests in emails.", "Verify email sender addresses before trusting links.", "Never enter personal info on untrusted websites." } },
+            { "password", new List<string> { "Use strong, unique passwords and enable two-factor authentication.",
+                                             "Avoid using personal information in your passwords.",
+                                             "Consider using a password manager to keep track of your credentials." } },
+            { "scam", new List<string> { "Be cautious of unsolicited emails requesting personal info.",
+                                             "Verify the source before clicking on suspicious links." } },
+            { "phishing", new List<string> { "Be cautious of emails asking for personal information.",
+                                             "Scammers may pose as trusted organizations—always verify links.",
+                                             "Do not click on suspicious links or attachments." } },
+            { "privacy", new List<string> { "Adjust your social media privacy settings for better protection.",
+                                           "Limit the amount of personal information you share online.",
+                                           "Use secure and encrypted messaging apps." } },
         };
 
-        static Dictionary<string, string> sentimentResponses = new Dictionary<string, string>()
+        static Dictionary<string, string> sentimentResponses = new Dictionary<string, string>
         {
-            { "worried", "It's okay to feel worried. Small cybersecurity steps make a big difference!" },
-            { "curious", "Curiosity is great! Let's keep learning together." },
-            { "frustrated", "I understand it can be frustrating. I'm here to help you step by step." }
+            { "worried", "It's completely understandable to feel that way, " + userName + ". Let me share some tips to help you stay safe." },
+            { "curious", "Curiosity is great, " + userName + "! Let's dive into the topic together." },
+            { "frustrated", "Don't worry, " + userName + "— these concepts can be tricky. I'm here to help!" }
         };
 
         static void Main(string[] args)
@@ -49,7 +56,7 @@ namespace Chatbot
 
         static void DisplayAsciiArt()
         {
-            string asciiArt = @"
+            string asciiArt = @" 
   ____      _                                        _ _            
  / ___|   _| |__   ___ _ __ ___  ___  ___ _   _ _ __(_) |_ _   _    
 | |  | | | | '_ \ / _ \ '__/ __|/ _ \/ __| | | | '__| | __| | | |   
@@ -58,8 +65,8 @@ namespace Chatbot
    / \|___/   ____ _ _ __ ___ _ __   ___  ___ ___  | __ )  |___/ |_ 
   / _ \ \ /\ / / _` | '__/ _ \ '_ \ / _ \/ __/ __| |  _ \ / _ \| __|
  / ___ \ V  V / (_| | | |  __/ | | |  __/\__ \__ \ | |_) | (_) | |_ 
-/_/   \_\_/\_/ \__,_|_|  \___|_| |_|\___||___/___/ |____/ \___/ \__| 
-    ";
+/_/   \_\_/\_/ \__,_|_|  \___|_| |_|\___||___/___/ |____/ \___/ \__|
+";
             Console.WriteLine(asciiArt);
         }
 
@@ -67,24 +74,22 @@ namespace Chatbot
         {
             TypeEffect("\nWhat's your name? ");
             userName = Console.ReadLine();
-
-            TypeEffect($"\nWelcome, {userName}! What's your favourite cybersecurity topic? ");
-            userInterest = Console.ReadLine();
-
-            TypeEffect($"Great! I'll remember you're interested in {userInterest}.");
+            TypeEffect($"\nWelcome, {userName}! Let's explore how to stay safe online together.");
         }
 
         static void ResponseSystem()
         {
             Random rnd = new Random();
-
+             
+            
             while (true)
             {
+                
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                TypeEffect("\nAsk me a question: (or enter <bye>,<exit>,<quit> to exit)");
+                TypeEffect("\nAsk me a question:(or enter <bye>,<exit>,<quit> to exit) ");
                 string input = Console.ReadLine()?.ToLower();
                 Console.ResetColor();
-
+                
                 if (string.IsNullOrWhiteSpace(input))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -98,10 +103,8 @@ namespace Chatbot
                     TypeEffect($"Thank you for chatting, {userName}! Stay safe online.");
                     break;
                 }
-
                 bool foundMatch = false;
-
-                //Keyword Recognition: Output all matching keywords
+                // Keyword recognition
                 foreach (var keyword in keywordResponses.Keys)
                 {
                     if (input.Contains(keyword))
@@ -110,42 +113,56 @@ namespace Chatbot
                         Console.ForegroundColor = ConsoleColor.Green;
                         TypeEffect(response);
                         Console.ResetColor();
+
+                        userInterest = keyword; // Save user interest
                         foundMatch = true;
                     }
                 }
 
-                //  Sentiment Detection: Output all matching sentiments
+                // Sentiment detection
                 foreach (var sentiment in sentimentResponses.Keys)
                 {
                     if (input.Contains(sentiment))
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
-                        TypeEffect(sentimentResponses[sentiment]);
+                        TypeEffect(sentimentResponses[sentiment].Replace(userName, userName)); // Use name
                         Console.ResetColor();
                         foundMatch = true;
                     }
                 }
 
-                // 🧠 Memory Recall follow-up
-                if (input.Contains("tell me more"))
+                // Memory recall
+                if (input.Contains("tell me more") && !string.IsNullOrWhiteSpace(userInterest))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    TypeEffect($"Since you're interested in {userInterest}, here's a tip: Always update your apps to patch security vulnerabilities.");
+                    TypeEffect($"{userName}, since you're interested in {userInterest}, here's a tip: Always update your apps to patch security vulnerabilities.");
                     Console.ResetColor();
                     foundMatch = true;
                 }
 
-                // ❓ Default fallback if nothing was recognized
+                // Fallback
                 if (!foundMatch)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     TypeEffect("I'm not sure I understand. Can you rephrase or ask something about cybersecurity?");
                     Console.ResetColor();
                 }
+
+                // Respond to "what's my name?" queries
+                if (input.Contains("name"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    if (!string.IsNullOrWhiteSpace(userName))
+                        TypeEffect($"Just kidding! Your name is {userName}! I didn’t forget. ");
+                    else
+                        TypeEffect("I don’t think you told me your name yet.");
+                    Console.ResetColor();
+                    foundMatch = true;
+                }
+
+
+
             }
         }
-
     }
 }
-
-
